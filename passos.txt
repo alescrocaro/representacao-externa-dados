@@ -1,0 +1,131 @@
+SD - Sistemas Distribuídos
+
+https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.22.3/protobuf-java-3.22.3.jar
+https://github.com/protocolbuffers/protobuf/releases/download/v22.3/protoc-22.3-linux-x86_64.zip
+
+pip3 install python3-protobuf protobuf 
+
+
+4. Criar o arquivo addressbook.proto
+
+syntax = "proto3";
+
+message Person {
+  string name = 1;
+  int32 id = 2;
+  string email = 3;
+}
+
+5. Gerar a estrutura e o código para Python:
+protoc --python_out=pythoncode/ addressbook.proto
+
+6. Gerar a estrutura e o código para Java:
+protoc --java_out=javacode/ addressbook.proto
+
+
+a2135485@dacom-labs:~/protoaula$ cd javacode
+a2135485@dacom-labs:~/protoaula/javacode$ wget https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.22.3/protobuf-java-3.22.3.jar
+--2023-04-25 21:58:35--  https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.22.3/protobuf-java-3.22.3.jar
+Resolvendo repo1.maven.org (repo1.maven.org)... 199.232.192.209, 199.232.196.209, 2a04:4e42:4c::209, ...
+Conectando-se a repo1.maven.org (repo1.maven.org)|199.232.192.209|:443... conectado.
+A requisição HTTP foi enviada, aguardando resposta... 200 OK
+Tamanho: 1676712 (1,6M) [application/java-archive]
+Salvando em: ‘protobuf-java-3.22.3.jar’
+
+protobuf-java-3.22.3.jar           100%[=============================================================>]   1,60M  1,59MB/s    em 1,0s    
+
+2023-04-25 21:58:37 (1,59 MB/s) - ‘protobuf-java-3.22.3.jar’ salvo [1676712/1676712]
+
+a2135485@dacom-labs:~/protoaula/javacode$ ls
+Addressbook.java  protobuf-java-3.22.3.jar
+
+para compilar no java
+a2135485@dacom-labs:~/protoaula/javacode$ javac --class-path .:protobuf-java-3.22.3.jar *.java
+
+7. Código em Python:
+import socket
+import addressbook_pb2
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(("localhost", 7000))
+
+#msg = "bom dia servidor."
+person = addressbook_pb2.Person()
+person.id = 234
+person.name = "Rodrigo Campiolo"
+person.email = "rcampiolo@ibest.com.br"
+
+# marshalling
+msg = person.SerializeToString()
+size = len(msg)
+
+client_socket.send((str(size) + "\n").encode())
+client_socket.send(msg)
+
+8. Código em Java (Para executar: java -cp .:protobuf-java-3.22.3.jar ServidorTcpAddressBook)
+
+import java.net.*;
+import java.io.*;
+import java.util.Arrays;
+
+/**
+ *
+ * @author rodrigo
+ */
+public class ServidorTcpAddressBook {
+
+    public static void main(String args[]) {
+        try {
+            int serverPort = 7000; // porta do servidor
+            /* cria um socket e mapeia a porta para aguardar conexão */
+            ServerSocket listenSocket = new ServerSocket(serverPort);
+
+            //while (true) {
+                System.out.println("Servidor aguardando conexão ...");
+
+                /* aguarda conexões */
+                Socket clientSocket = listenSocket.accept();
+
+                System.out.println("Cliente conectado ...");
+                
+                /* recebe os dados enviados pelo cliente*/
+                DataInputStream inClient = new DataInputStream(clientSocket.getInputStream());
+                InputStreamReader i;
+                
+                String valueStr = inClient.readLine();
+                System.out.println("Valor lido:" + valueStr);
+                
+                int sizeBuffer = Integer.valueOf(valueStr);
+                
+                byte[] buffer = new byte[sizeBuffer];
+                inClient.read(buffer);
+                System.out.println(Arrays.toString(buffer));
+                
+                /* realiza o unmarshalling */
+                Addressbook.Person p = Addressbook.Person.parseFrom(buffer);
+                
+                /* exibe na tela */
+                System.out.println("--\n" + p + "--\n");
+                
+                
+            //} //while
+
+        } catch (IOException e) {
+            System.out.println("Listen socket:" + e.getMessage());
+        } //catch
+    } //main
+} //class    
+
+
+
+
+
+
+
+javac --class-path .:protobuf-java-3.22.3.jar *.java
+
+
+pip3 install --upgrade protobuf
+
+
+java ServidorTcpAddressBook 
