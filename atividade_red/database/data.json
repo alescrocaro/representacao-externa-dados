@@ -1,0 +1,107 @@
+{
+  "data": [
+    {
+      "_id": {
+        "$oid": "573a1390f29313caabcd413b"
+      },
+      "title": "The Arrival of a Train",
+      "year": {
+        "$numberInt": "1896"
+      },
+      "runtime": {
+        "$numberInt": "1"
+      },
+      "released": {
+        "$date": {
+          "$numberLong": "-2335219200000"
+        }
+      },
+      "poster": "http://ia.media-imdb.com/images/M/MV5BMjEyNDk5MDYzOV5BMl5BanBnXkFtZTgwNjIxMTEwMzE@._V1_SX300.jpg",
+        "plot": "A group of people are standing in a straight line along the platform of a railway station, waiting for a train, which is seen coming at some distance. When the train stops at the platform, ...",
+      "fullplot": "A group of people are standing in a straight line along the platform of a railway station, waiting for a train, which is seen coming at some distance. When the train stops at the platform, the line dissolves. The doors of the railway-cars open, and people on the platform help passengers to get off.",
+      "lastupdated": "2015-08-15 00:02:53.443000000",
+      "type": "movie",
+      "directors": [
+        "Auguste Lumière",
+        "Louis Lumière"
+      ],
+      "imdb": {
+        "rating": {
+          "$numberDouble": "7.3"
+        },
+        "votes": {
+          "$numberInt": "5043"
+        },
+        "id": {
+          "$numberInt": "12"
+        }
+      },
+      "cast": [
+        "Madeleine Koehler"
+      ],
+      "countries": [
+        "France"
+      ],
+      "genres": [
+        "Documentary",
+        "Short"
+      ],
+      "tomatoes": {
+        "viewer": {
+          "rating": {
+            "$numberDouble": "3.7"
+          },
+          "numReviews": {
+            "$numberInt": "59"
+          }
+        },
+        "lastUpdated": {
+          "$date": {
+            "$numberLong": "1441993589000"
+          }
+        }
+      },
+      "num_mflix_comments": {
+        "$numberInt": "1"
+      }
+    }, 
+    {
+      "_id": {
+        "$oid": "612aafcf35e8f400075e66d2"
+      },
+      "title": "Shrek terceiro",
+      "year": {
+        "$numberInt": "2007"
+      },
+      "runtime": {
+        "$numberInt": "2"
+      },
+      "released": {
+        "$date": {
+          "$numberLong": "-2335219200000"
+        }
+      },
+      "poster": "https://upload.wikimedia.org/wikipedia/pt/c/c2/Shrek_the_Third_Poster.jpg",
+      "plot": "plot shurek",
+      "fullplot": "fullplot shurek",
+      "lastupdated": "2015-08-15 00:02:53.443000000",
+      "type": "movie",
+      "directors": [
+        "Chris Miller"
+      ],
+      "cast": [
+        "Mike Myers", "Cameron Diaz", "Antonio Banderas", "Justin Timberlake", "Eddie Murphy", "Julie Andrews", "John Cleese", "Rupert Everett", "Eric Idle"
+      ],
+      "countries": [
+        "United States"
+      ],
+      "genres": [
+        "Comedy",
+        "Fantasy"
+      ],
+      "num_mflix_comments": {
+        "$numberInt": "777"
+      }
+    }
+  ]
+}
