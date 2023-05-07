@@ -10,7 +10,7 @@ DB_PASSWORD = quote_plus(os.getenv('DB_PASSWORD'))
 
 class MongoDBClient:
     def __init__(self):
-        uri = f"mongodb+srv://{DB_USER}:{DB_PASSWORD}a@cluster0.8412ycf.mongodb.net/?retryWrites=true&w=majority"
+        uri = f"mongodb+srv://{DB_USER}:{DB_PASSWORD}@cluster0.8412ycf.mongodb.net/?retryWrites=true&w=majority"
         self.client = MongoClient(uri)
 
     def get_client(self):

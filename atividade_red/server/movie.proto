@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+package teste;
+
+message Movie {
+  optional int32 _id = 1;
+  optional string title = 2;
+  repeated string cast = 3;
+  repeated string genres = 4;
+  optional int32 runtime = 5;
+  optional int32 year = 6;
+  optional string type = 7;
+}
+
+message MoviesList {
+  repeated Movie movies = 1;
+}
+
+
+
+
+
+  // enum PhoneType {
+  //   MOBILE = 0;
+  //   HOME = 1;
+  //   WORK = 2;
+  // }
+
+  // message PhoneNumber {
+  //   optional string number = 1;
+  //   optional PhoneType type = 2 [default = HOME];
+  // }
+
+  // repeated PhoneNumber phones = 4;
+
+// message AddressBook {
+//   repeated Person people = 1;
+// }
