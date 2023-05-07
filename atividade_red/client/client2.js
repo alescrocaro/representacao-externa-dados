@@ -51,8 +51,10 @@ const initial_input = () => {
       var message = build_message(line.trim());
       
       if (!message) continue
-      
-      message += get_extra_infos(line);
+
+      const extra_infos = get_extra_infos(line);
+      if (extra_infos) message += extra_infos;
+      else continue;
 
 
       client.write(message);
@@ -70,10 +72,10 @@ const get_extra_infos = input => {
     const title = prompt('title: ').trim();
     extra_info += title;
   } else if (input === 'list') {
-    const filter = prompt('filter (cast or genre): ').trim();
+    const filter = prompt('filter (actor or genre): ').trim();
     
-    if (filter === 'cast' || filter === 'genre') {
-      extra_info += number_to_bytes(filter === 'cast' ? CAST_FILTER_ID : GENRE_FILTER_ID) ; 
+    if (filter === 'actor' || filter === 'genre') {
+      extra_info += number_to_bytes(filter === 'actor' ? CAST_FILTER_ID : GENRE_FILTER_ID) ; 
       const filter_input = prompt("Input: ").trim();
       extra_info += number_to_bytes(filter_input.length); // size of filters
       extra_info += filter_input;

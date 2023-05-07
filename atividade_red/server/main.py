@@ -43,6 +43,9 @@ class Server:
 
             print(f"{num_documents} documents found.") # exibir número de documentos encontrados
 
+            if num_documents == 0: 
+                return None
+
             return movies
 
     def update_movie(self):
@@ -69,6 +72,9 @@ CAST_FILTER_ID = 2
 
 
 def movies_to_string(movies_dict):
+    if movies_dict == None:
+        return 'No movies found'.encode('utf-8')
+
     try:
         movies = []
 
@@ -76,9 +82,6 @@ def movies_to_string(movies_dict):
             movie = Movie()
             movie.title = movie_dict['title']
             movies.append(movie)
-
-        # if (len(movies) > 0): print(movies[0])
-        # else: print(movies)
 
         movie_list = MoviesList()
         movie_list.movies.extend(movies)
@@ -160,7 +163,7 @@ BUFFER_SIZE = 1024
 
 def main():
     HOST = "127.0.0.1"
-    # PORT = 4444
+    PORT = 4444
     PORT = 7770
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
