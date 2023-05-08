@@ -3,6 +3,7 @@ import socket
 from db_connection import MongoDBClient
 from pymongo.errors import PyMongoError
 from movie_pb2 import Movie, MoviesList
+from google.protobuf.json_format import MessageToDict
 
 class Server:
     def __init__(self):
@@ -15,7 +16,6 @@ class Server:
             # try to access a collection or run an operation to check connection
             self.db = self.db_client['sample_mflix']
             self.collection = self.db['movies']
-            self.collection.count_documents({})
 
             print("MongoDB connection established!")
             self.connected = True
@@ -39,9 +39,7 @@ class Server:
 
             movies = self.collection.find({filterType: {'$regex': f'.*{filterValue}.*'}})
 
-            num_documents = self.collection.count_documents({filterType: {'$regex': f'.*{filterValue}.*'}}) # contar documentos
-
-            print(f"{num_documents} documents found.") # exibir número de documentos encontrados
+            num_documents = self.collection.count_documents({filterType: {'$regex': f'.*{filterValue}.*'}}) #number of movies found
 
             if num_documents == 0: 
                 return None
@@ -71,7 +69,12 @@ CAST_FILTER_ID = 2
 
 
 
-def movies_to_string(movies_dict):
+"""
+Esse código cria uma lista de objetos Movie a partir dos dicionários recebidos na resposta,
+e depois cria a mensagem MovieList com a lista de filmes. Por fim, a mensagem é serializada 
+em bytes com o método SerializeToString(), que pode ser enviada pela rede.
+"""
+def movies_dict_to_string(movies_dict):
     if movies_dict == None:
         return 'No movies found'.encode('utf-8')
 
@@ -92,12 +95,7 @@ def movies_to_string(movies_dict):
         print(f"Error while serializing DB response: {e}")
 
 
-"""
-Esse código cria uma lista de objetos Movie a partir dos dicionários recebidos na resposta,
-e depois cria a mensagem MovieList com a lista de filmes. Por fim, a mensagem é serializada 
-em bytes com o método SerializeToString(), que pode ser enviada pela rede.
-"""
-def handle_client_connection(client_socket, client_address, server):
+def handle_client_connection(client_socket, client_address, db_server):
     print('handle_client_connection')
     while True:
         try:
@@ -114,6 +112,43 @@ def handle_client_connection(client_socket, client_address, server):
 
                 print('req_type', req_type)
 
+                if req_type == CREATE_ID.to_bytes(1, 'big'):
+                    client_socket.send('waitingCreate'.encode('utf-8'))
+
+                    print('waiting create data')
+                    data = client_socket.recv(1024)
+                    print('data', data)
+
+                    try:
+                        movie = Movie()
+                        try:
+                            movie.ParseFromString(data)
+                            print(movie.title)
+                            print(movie.cast)
+                            print(movie.genres)
+                            print(movie.runtime)
+                            print(movie.year)
+                            print(movie.type)
+
+                        except Exception as e:
+                            print(f'Error while deserializing: {e}')
+                        
+                        movie_dict = {
+                            "title": f"{movie.title}",
+                            "cast": f"{movie.cast}",
+                            "genres": f"{movie.genres}",
+                            "runtime": f"{movie.runtime}",
+                            "year": f"{movie.year}",
+                            "type": f"{movie.type}",
+                        }
+                        
+                        # print('antes de inserir', movies_dict)
+
+                        result = db_server.collection.insert_one(movie_dict)
+                        print('Inserted document with _id:', result.inserted_id)
+                    except Exception as e:
+                        print(f'Error while inserting new movie: {e}')
+
                 if req_type == LIST_ID.to_bytes(1, 'big'):
                     filter_type = data[2:3]
                     print('filter_type', filter_type)
@@ -125,18 +160,18 @@ def handle_client_connection(client_socket, client_address, server):
                     print('filter', filter)
 
                     if filter_type == GENRE_FILTER_ID.to_bytes(1, 'big'):
-                        movies = server.read_movie(['genres', filter])
+                        movies = db_server.read_movie(['genres', filter])
 
-                        response = movies_to_string(movies)
+                        response = movies_dict_to_string(movies)
 
                         print(response)
                         print('envia')
                         client_socket.send(response)
 
                     elif filter_type == CAST_FILTER_ID.to_bytes(1, 'big'):
-                        movies = server.read_movie(['cast', filter])
+                        movies = db_server.read_movie(['cast', filter])
 
-                        response = movies_to_string(movies)
+                        response = movies_dict_to_string(movies)
 
                         print(response)
                         print('envia')
@@ -163,8 +198,8 @@ BUFFER_SIZE = 1024
 
 def main():
     HOST = "127.0.0.1"
-    PORT = 4444
-    PORT = 7770
+    PORT = 52515
+    PORT = 47324
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen()
