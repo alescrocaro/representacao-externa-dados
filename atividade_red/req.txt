@@ -1,0 +1,8 @@
+sudo apt install protobuf-compiler
+pip3 install protobuf
+
+
+sv:
+protoc --python_out=../client movie.proto
+
+client:
