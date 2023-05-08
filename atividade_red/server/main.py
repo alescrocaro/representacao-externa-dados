@@ -24,9 +24,47 @@ class Server:
             print("Connection failed:")
             print(e)
 
-    def create_movie(self):
+    def create_movie(self, data):
         if self.connected:
             print('creating movie...')
+            try:
+                movie = Movie()
+                try:
+                    movie.ParseFromString(data)
+                    # print(movie.title)
+                    # print(movie.cast)
+                    # print(movie.genres)
+                    # print(movie.runtime)
+                    # print(movie.year)
+                    # print(movie.type)
+
+                except Exception as e:
+                    print(f'Error while deserializing: {e}')
+                
+                movie_dict = {
+                    "title": f"{movie.title}",
+                    "cast": f"{movie.cast}",
+                    "genres": f"{movie.genres}",
+                    "runtime": f"{movie.runtime}",
+                    "year": f"{movie.year}",
+                    "type": f"{movie.type}",
+                }
+                
+                result = self.collection.insert_one(movie_dict)
+                print('Inserted document with _id:', result.inserted_id)
+                
+                movies = self.collection.find({'_id': result.inserted_id})
+
+                num_documents = self.collection.count_documents({'_id': result.inserted_id}) 
+
+                if num_documents == 0: 
+                    return None
+                
+                response = movies_dict_to_string(movies)
+                return response
+
+            except Exception as e:
+                print(f'Error while inserting new movie: {e}')
 
     def read_movie(self, filter):
         if self.connected:
@@ -119,35 +157,9 @@ def handle_client_connection(client_socket, client_address, db_server):
                     data = client_socket.recv(1024)
                     print('data', data)
 
-                    try:
-                        movie = Movie()
-                        try:
-                            movie.ParseFromString(data)
-                            print(movie.title)
-                            print(movie.cast)
-                            print(movie.genres)
-                            print(movie.runtime)
-                            print(movie.year)
-                            print(movie.type)
-
-                        except Exception as e:
-                            print(f'Error while deserializing: {e}')
-                        
-                        movie_dict = {
-                            "title": f"{movie.title}",
-                            "cast": f"{movie.cast}",
-                            "genres": f"{movie.genres}",
-                            "runtime": f"{movie.runtime}",
-                            "year": f"{movie.year}",
-                            "type": f"{movie.type}",
-                        }
-                        
-                        # print('antes de inserir', movies_dict)
-
-                        result = db_server.collection.insert_one(movie_dict)
-                        print('Inserted document with _id:', result.inserted_id)
-                    except Exception as e:
-                        print(f'Error while inserting new movie: {e}')
+                    response = db_server.create_movie(data)
+                    print('response', response)
+                    client_socket.send(response)
 
                 if req_type == LIST_ID.to_bytes(1, 'big'):
                     filter_type = data[2:3]
