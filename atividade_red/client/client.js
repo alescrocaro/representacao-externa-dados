@@ -18,32 +18,41 @@ const CLOSE_ID = 5;
 const GENRE_FILTER_ID = 1
 const CAST_FILTER_ID = 2
 
+
+const SUCCESS = 200
+const FAIL = 500
+
 const client = new net.Socket();
 
+var global_movie_name = undefined;
+
 let PORT = 52515
-PORT = 47324
+// PORT = 47323
 
 client.connect(PORT, '127.0.0.1', function() {
     console.log('Connection established with server.');
     console.log("You can use the following commands:");
-    console.log('create');
-    console.log('list');
-    console.log('update');
-    console.log('delete');
-    console.log('close');
+    console.log('> create');
+    console.log('> list');
+    console.log('> update');
+    console.log('> delete');
+    console.log('> close');
     initial_input();
 });
 
-const getCreateOrUpdateData = (writeType) => {
-  console.log('getCreateOrUpdateData');
-  let new_title = '';
+const getCreateOrUpdateData = (isUpdating) => {
+  let new_title = isUpdating ? isUpdating : '';
   let new_cast = '';
   let new_genres = '';
   let new_runtime = '';
   let new_year = '';
   let filled_fields = 0;
+  if (isUpdating) {
+    console.log('updating movie: ', new_title);
+    filled_fields += 1;
+  }
   while (true) {
-    if (filled_fields == 0) {
+    if (filled_fields == 0 && !isUpdating) {
       const title = prompt('title: ').trim();
       if (title === '') {
         console.log('The movie must have a title');
@@ -92,7 +101,6 @@ const getCreateOrUpdateData = (writeType) => {
       filled_fields += 1;
       new_year = year;
     }
-    console.log('break getCreateOrUpdateData');
     break;
   }
   const protobuf_movie_obj = build_protobuf_movie_object(new_title, new_cast, new_genres, Number(new_runtime), Number(new_year));
@@ -106,12 +114,25 @@ client.on('data', data => {
   try {
     console.log('data received from server: ');
     console.log(data.toString());
-    if (data.toString() === 'waitingCreate') {
-      const dataToWrite = getCreateOrUpdateData(data.toString());
+
+    const stringData = data.toString();
+    if (data.toString() === 'waitingCreate' || stringData.substring(0, 13) === 'waitingUpdate') {
+      const isUpdating = stringData.substring(0, 13) === 'waitingUpdate' ? global_movie_name : false;
+      
+      const dataToWrite = getCreateOrUpdateData(isUpdating);
 
       client.write(dataToWrite);
       return;
     }
+    else if (data[0] === 200) {
+      console.log('Successful request');
+      return;
+    }
+    else if (data[0] === 500) {
+      console.log('Response returned error');
+      return;
+    }
+
     initial_input();
   } catch (err) {
     console.log('catch', err);
@@ -151,20 +172,24 @@ const get_extra_infos = input => {
     const filter = prompt('filter (actor or genre): ').trim();
     
     if (filter === 'actor' || filter === 'genre') {
-      extra_info += number_to_bytes(filter === 'actor' ? CAST_FILTER_ID : GENRE_FILTER_ID) ; 
+      extra_info += number_to_bytes(filter === 'actor' ? CAST_FILTER_ID : GENRE_FILTER_ID); 
       const filter_input = prompt("Input: ").trim();
       extra_info += number_to_bytes(filter_input.length); 
       extra_info += filter_input;
     } else {
       return undefined;
     }
+  } else if (input === 'update') {
+    const movie_name = prompt("Movie name: ").trim();
+    global_movie_name = movie_name;
+    extra_info += number_to_bytes(movie_name.length); 
+    extra_info += movie_name;
   }
 
   return extra_info;
 }
 
 const build_header = (input) => {
-  console.log('build_header');
   let message = number_to_bytes(REQ);
 
   switch (input) {
@@ -191,7 +216,6 @@ const build_header = (input) => {
 
   return message;
 }
-
 
 const build_protobuf_movie_object = (title, cast, genres, runtime, year) => {
   const movie_obj = {

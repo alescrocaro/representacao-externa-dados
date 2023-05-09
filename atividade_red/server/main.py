@@ -58,10 +58,9 @@ class Server:
                 num_documents = self.collection.count_documents({'_id': result.inserted_id}) 
 
                 if num_documents == 0: 
-                    return None
+                    return FAIL.to_bytes(1, 'big')
                 
-                response = movies_dict_to_string(movies)
-                return response
+                return SUCCESS.to_bytes(1, 'big')
 
             except Exception as e:
                 print(f'Error while inserting new movie: {e}')
@@ -84,9 +83,38 @@ class Server:
 
             return movies
 
-    def update_movie(self):
+    def update_movie(self, new_movie, movie_title):
         if self.connected:
             print('updating movie...')
+            try:
+                movie = Movie()
+                try:
+                    movie.ParseFromString(new_movie)
+
+                except Exception as e:
+                    print(f'Error while deserializing: {e}')
+                
+                movie_dict = {
+                    "title": f"{movie.title}",
+                    "cast": f"{movie.cast}",
+                    "genres": f"{movie.genres}",
+                    "runtime": f"{movie.runtime}",
+                    "year": f"{movie.year}",
+                    "type": f"{movie.type}",
+                }
+                
+                result = self.collection.update_one({'title': movie_title}, {"$set": movie_dict})
+                print('updated movie:', movie_title)
+                
+                if result.modified_count > 0:
+                    return SUCCESS.to_bytes(1, 'big')
+                
+                return FAIL.to_bytes(1, 'big')
+
+
+            except Exception as e:
+                print(f'Error while inserting new movie: {e}')
+
 
     def delete_movie(self):
         if self.connected:
@@ -94,7 +122,9 @@ class Server:
 
 
 REQ = 1
-RES = 2
+
+SUCCESS = 200
+FAIL = 500
 
 CREATE_ID = 1
 LIST_ID = 2
@@ -189,10 +219,29 @@ def handle_client_connection(client_socket, client_address, db_server):
                         print('envia')
                         client_socket.send(response)
 
+                if req_type == UPDATE_ID.to_bytes(1, 'big'):
+                    movie_title_size = int.from_bytes(data[2:3], 'big')
+                    movie_title = data[3:3+movie_title_size].decode('utf-8')
+
+                    movies = db_server.read_movie(['title', movie_title])
+
+                    movie = movies_dict_to_string(movies)
+
+                    response = b'waitingUpdate' + movie
+
+                    client_socket.send(response)
+
+                    print('waiting update data')
+                    data = client_socket.recv(1024)
+                    print('data', data)
+
+                    response = db_server.update_movie(data, movie_title)
+                    print('response', response)
+                    client_socket.send(response)
+
             elif data.decode('utf-8') == 'close':
                 print(f'Connection with {client_address} closed.')
                 client_socket.send('close'.encode('utf-8'))
-                print('break')
                 break
 
         except Exception as e:
@@ -211,7 +260,7 @@ BUFFER_SIZE = 1024
 def main():
     HOST = "127.0.0.1"
     PORT = 52515
-    PORT = 47324
+    # PORT = 47323
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen()
