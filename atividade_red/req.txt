@@ -1,9 +1,0 @@
-sudo apt install protobuf-compiler
-pip3 install protobuf
-
-
-sv:
-protoc --python_out=. --proto_path=../ ../movie.proto 
-
-client:
-protoc --js_out=import_style=commonjs,binary:. --proto_path=../ ../movie.proto
