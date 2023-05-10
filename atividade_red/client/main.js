@@ -6,22 +6,6 @@ const { Movie, Response, Command } = require('./movie_pb');
 
 const accepted_commands = ['create', 'list', 'update', 'delete']
 
-const REQ = 1;
-const RES = 2;
-
-const CREATE_ID = 1;
-const LIST_ID = 2;
-const UPDATE_ID = 3;
-const DELETE_ID = 4;
-const CLOSE_ID = 5;
-
-const GENRE_FILTER_ID = 1
-const CAST_FILTER_ID = 2
-
-
-const SUCCESS = 200
-const FAIL = 500
-
 const client = new net.Socket();
 
 var global_movie_name = undefined;
@@ -29,7 +13,10 @@ var global_movie_name = undefined;
 let PORT = 52515
 PORT = 47323
 
-client.connect(PORT, '127.0.0.1', function() {
+/**
+ * connect function with API, then calls main function
+ */
+client.connect(PORT, '127.0.0.1', () => {
     console.log('Connection established with server.');
     console.log("You can use the following commands:");
     console.log('> create');
@@ -40,8 +27,14 @@ client.connect(PORT, '127.0.0.1', function() {
     main();
 });
 
+/**
+ * Get information to create or update a movie. does not let user leave a field empty.
+ * If user is updating a movie, shows the movie name.
+ * @param {boolean} isUpdating: user is updating a movie 
+ * @returns {Uint8Array} with information about the movie
+ */
 const getCreateOrUpdateData = (isUpdating) => {
-  console.log('getCreateOrUpdateData')
+  // console.log('getCreateOrUpdateData')
   let new_title = isUpdating ? isUpdating : '';
   let new_cast = '';
   let new_genres = '';
@@ -111,15 +104,20 @@ const getCreateOrUpdateData = (isUpdating) => {
   return data;
 }  
 
+
+/**
+ * Get information from API and, if API is waiting for a response, calls a function to get user input,
+ * if it's an error or success message, display in console, if it's an close, destroy the client, and 
+ * then calls main function
+ */
 client.on('data', data => {
   try {
     console.log('data received from server: ');
-    console.log(data);
     console.log(data.toString());
 
     const stringData = data.toString().trim();
     if (stringData === 'waitingCreate' || stringData.substring(0, 14).includes('waitingUpdate')) { // idk why but stringData is like ' waitingUpdate'
-      console.log('entrou if')
+      // console.log('entrou if')
       const isUpdating = stringData.substring(0, 14) === 'waitingUpdate' ? global_movie_name : false;
       
       const dataToWrite = getCreateOrUpdateData(isUpdating);
@@ -138,14 +136,18 @@ client.on('data', data => {
       client.destroy();
     }
 
-    main();
   } catch (err) {
-    console.log('catch', err);
+    console.log('catch error: ', err);
   } finally {
-    console.log('finally')
+    main();
   }
 });
 
+/**
+ * Get information for the CRUD (like the title of the movie)
+ * @param {string} input: user input 
+ * @returns string with all the information the CRUD needs 
+ */
 const get_extra_infos = input => {
   let extra_info = '';
   
@@ -176,6 +178,15 @@ const get_extra_infos = input => {
   return extra_info;
 }
 
+/**
+ * Get the movie information, insert in a object, then converts to a protobuf
+ * @param {string} title 
+ * @param {string[]} cast 
+ * @param {string[]} genres 
+ * @param {number} runtime 
+ * @param {number} year 
+ * @returns {UInt8Array.buffer} protobuf of the movie inputted by params
+ */
 const build_protobuf_movie_object = (title, cast, genres, runtime, year) => {
   const movie_obj = {
     title, 
@@ -199,20 +210,11 @@ const build_protobuf_movie_object = (title, cast, genres, runtime, year) => {
   return protobuf_movie_obj;
 }
 
-
-/** 
-  * number_to_bytes function: converts a number to in a bytes buffer
-  * 
-  * params: 
-  *     num: number to be converted to bytes
-  * 
-  * explanation:
-  *     toString() converts the number into a hex decimal string,
-  *     padStart() adds a zero in the left if string has only one char,
-  *     Buffer.from creates a buffer from a hex dec string.
-*/
-
-
+/**
+ * Convert user input in a shape the API will understand 
+ * @param {string} input: user command for a CRUD or close connection
+ * @returns {string} with command length + command
+ */
 const build_header = (input) => {
   let message = '';
 
@@ -250,6 +252,9 @@ const build_header = (input) => {
   return message;
 }
 
+/**
+ * Get user command
+ */
 const main = () => {
   while (true) {
     const line = prompt('$ ')
