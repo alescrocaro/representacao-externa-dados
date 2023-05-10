@@ -295,8 +295,7 @@ def handle_client_connection(client_socket, client_address, db_server):
 
                     response = movies_dict_to_string(movies)
 
-                    print(response)
-                    print('envia')
+                    print('envia', response)
                     client_socket.send(response)
 
                 elif filter_type == 'cast':
@@ -304,8 +303,7 @@ def handle_client_connection(client_socket, client_address, db_server):
 
                     response = movies_dict_to_string(movies)
 
-                    print(response)
-                    print('envia')
+                    print('envia', response)
                     client_socket.send(response)
 
             elif req_type == 'update':

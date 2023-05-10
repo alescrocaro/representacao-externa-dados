@@ -121,6 +121,7 @@ const getCreateOrUpdateData = (isUpdating) => {
 client.on('data', data => {
   try {
     console.log('data received from server: ');
+    console.log('');
     console.log(data.toString());
 
     const stringData = data.toString().trim();
@@ -136,18 +137,17 @@ client.on('data', data => {
     else if (stringData === 'error') {
       console.log('Error');
     }
-    else if (stringData === 'success') {
+    else if (stringData.includes('success')) {
       console.log('Success');
     }
-    else if (stringData === 'close') {
+    else if (stringData.includes('close')) {
       console.log('Connection closed');
       client.destroy();
     }
 
+    main();
   } catch (err) {
     console.log('catch error: ', err);
-  } finally {
-    main();
   }
 });
 
