@@ -1,3 +1,11 @@
+"""
+    Make connection with database through information provided by .env
+    Author: Alexandre Aparecido Scrocaro Junior, Pedro Klayn
+    Dates: 
+        start: 02/05/2023
+        more info: https://github.com/alescrocaro/representacao-externa-dados
+"""
+
 import os
 
 from pymongo import MongoClient

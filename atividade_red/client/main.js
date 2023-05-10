@@ -1,8 +1,6 @@
 const net = require('net');
-const protos = require('google-protobuf');
-const protobuf = require("protobufjs");
 const prompt = require('prompt-sync')();
-const { Movie, Response, Command } = require('./movie_pb');
+const { Movie, Command } = require('./movie_pb');
 
 const accepted_commands = ['create', 'list', 'update', 'delete']
 

@@ -1,11 +1,26 @@
+"""
+    Make connection with client and database, make database calls (CRUD) and
+    treat information from client. 
+    Receives data as protobuf in format bellow:
+
+    command size + command (create | list | update | delete) + movie data related (each command can receive a specific data, like movie title or all movie infos)
+
+    Author: Alexandre Aparecido Scrocaro Junior, Pedro Klayn
+    Dates: 
+        start: 02/05/2023
+        more info: https://github.com/alescrocaro/representacao-externa-dados
+"""
+
 import socket
 
 from db_connection import MongoDBClient
 from pymongo.errors import PyMongoError
-from movie_pb2 import Movie, MoviesList, Command, Response
-from google.protobuf.json_format import MessageToDict
+from movie_pb2 import Movie, MoviesList, Response
 
 class Server:
+    """
+        Start database connection
+    """
     def __init__(self):
         print('setou false')
         self.connected = False
@@ -19,7 +34,7 @@ class Server:
             self.collection = self.db['movies']
 
             print("MongoDB connection established!")
-            print('setou true')
+            # print('setou true')
             self.connected = True
 
         except PyMongoError as e:
@@ -27,7 +42,14 @@ class Server:
             print(e)
 
     def create_movie(self, data):
-        print('self.connected', self.connected)
+        """Converts protobuf into an movie dict and inserts data in database 
+
+        Args:
+            data (_type_): movie data
+
+        Returns:
+            Response: 'success' or 'error' serialized into a protobuf
+        """
         if self.connected:
             print('creating movie...')
             try:
@@ -56,8 +78,6 @@ class Server:
                 result = self.collection.insert_one(movie_dict)
                 print('Inserted document with _id:', result.inserted_id)
                 
-                movies = self.collection.find({'_id': result.inserted_id})
-
                 num_documents = self.collection.count_documents({'_id': result.inserted_id}) 
 
                 if num_documents == 0: 
@@ -73,6 +93,14 @@ class Server:
                 print(f'Error while inserting new movie: {e}')
 
     def read_movie(self, filter):
+        """Get movies filtered by cast or genres
+
+        Args:
+            filter (string[]): ['cast'|'genres', '<user_input_from_client>']
+
+        Returns:
+            MoviesList: All movies found into a dictionary list
+        """
         if self.connected:
             print('reading movie...')
             print('filter', filter)
@@ -91,6 +119,15 @@ class Server:
             return movies
 
     def update_movie(self, new_movie, movie_title):
+        """Create movie object with new data received from client and update the correspondent movie in database
+
+        Args:
+            new_movie (Movie): new movie data to update movie
+            movie_title (string): movie to be updated
+
+        Returns:
+            Response: 'error' or 'success' in a protobuf response
+        """
         if self.connected:
             print('updating movie...')
             try:
@@ -133,6 +170,14 @@ class Server:
                 print(f'Error while updating movie: {e}')
 
     def delete_movie(self, movie_title):
+        """Deletes a movie from database by its title
+
+        Args:
+            movie_title (string): received from client
+
+        Returns:
+            Response: 'error' or 'success' in a protobuf response
+        """
         if self.connected:
             print('deleting movie...')
             try: 
@@ -149,17 +194,16 @@ class Server:
                 print(f'Error while deleting movie: {e}')
 
 
-
-SUCCESS = 200
-FAIL = 500
-
-
-"""
-Esse código cria uma lista de objetos Movie a partir dos dicionários recebidos na resposta,
-e depois cria a mensagem MovieList com a lista de filmes. Por fim, a mensagem é serializada 
-em bytes com o método SerializeToString(), que pode ser enviada pela rede.
-"""
 def movies_dict_to_string(movies_dict, isUpdating=False):
+    """Create a object list from dictionaries received, then create a MovieList. Then returns the resultant protobuf serialized 
+
+    Args:
+        movies_dict (MoviesList): 
+        isUpdating (bool, optional): controls response returned if user is updating a movie. Defaults to False.
+
+    Returns:
+        string: list with all movies in a serialized string or a message that found no movie
+    """
     if movies_dict == None:
         response = Response()
         response.message = 'No movies found'
@@ -188,6 +232,14 @@ def movies_dict_to_string(movies_dict, isUpdating=False):
 
 
 def str_to_num(str):
+    """Converts string into a number if it is digit
+
+    Args:
+        str (string): string to be converted in number
+
+    Returns:
+        int | None: int if conversion went well, None if string is not a digit
+    """
     if str.isdigit():
         return int(str)
 
@@ -195,6 +247,13 @@ def str_to_num(str):
 
 
 def handle_client_connection(client_socket, client_address, db_server):
+    """handle client command inputs for CRUD or close connection
+
+    Args:
+        client_socket (socket): client socket to send and receive data
+        client_address (_RetAddress): client address to display in messages in terminal
+        db_server (Server): class created to do db operations
+    """
     print('handle_client_connection')
     while True:
         try:
@@ -284,29 +343,27 @@ def handle_client_connection(client_socket, client_address, db_server):
 
             elif req_type == 'close':
                 print(f'Connection with {client_address} closed.')
-                print('setou false')
+                # print('setou false')
                 db_server.connected = False; 
                 client_socket.send('close'.encode('utf-8'))
                 break
 
         except Exception as e:
             print(f"Error while handling connection: {e}")
-            print('setou false')
+            # print('setou false')
             db_server.connected = False; 
             break
     
-    print('setou false')
+    # print('setou false')
     db_server.connected = False; 
     print(f'Connection with {client_address} closed.')
     client_socket.close()
     return
             
 
-
-
-BUFFER_SIZE = 1024
-
 def main():
+    """Keep receiving client connection until something goes wrong or server is closed
+    """
     HOST = "127.0.0.1"
     PORT = 52515
     PORT = 47323
