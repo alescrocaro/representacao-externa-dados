@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bmovie.proto\x12\x05teste\"n\n\x05Movie\x12\x0b\n\x03_id\x18\x01 \x01(\x05\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0c\n\x04\x63\x61st\x18\x03 \x03(\t\x12\x0e\n\x06genres\x18\x04 \x03(\t\x12\x0f\n\x07runtime\x18\x05 \x01(\x05\x12\x0c\n\x04year\x18\x06 \x01(\x05\x12\x0c\n\x04type\x18\x07 \x01(\t\"*\n\nMoviesList\x12\x1c\n\x06movies\x18\x01 \x03(\x0b\x32\x0c.teste.Movie')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bmovie.proto\x12\x05teste\"{\n\x05Movie\x12\x10\n\x03_id\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0c\n\x04\x63\x61st\x18\x03 \x03(\t\x12\x0e\n\x06genres\x18\x04 \x03(\t\x12\x0f\n\x07runtime\x18\x05 \x01(\x05\x12\x0c\n\x04year\x18\x06 \x01(\x05\x12\x0c\n\x04type\x18\x07 \x01(\tB\x06\n\x04X_id\"*\n\nMoviesList\x12\x1c\n\x06movies\x18\x01 \x03(\x0b\x32\x0c.teste.Movie\"\x1a\n\x07\x43ommand\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1b\n\x08Response\x12\x0f\n\x07message\x18\x01 \x01(\tb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,7 +22,11 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _globals['_MOVIE']._serialized_start=22
-  _globals['_MOVIE']._serialized_end=132
-  _globals['_MOVIESLIST']._serialized_start=134
-  _globals['_MOVIESLIST']._serialized_end=176
+  _globals['_MOVIE']._serialized_end=145
+  _globals['_MOVIESLIST']._serialized_start=147
+  _globals['_MOVIESLIST']._serialized_end=189
+  _globals['_COMMAND']._serialized_start=191
+  _globals['_COMMAND']._serialized_end=217
+  _globals['_RESPONSE']._serialized_start=219
+  _globals['_RESPONSE']._serialized_end=246
 # @@protoc_insertion_point(module_scope)

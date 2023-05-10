@@ -1,21 +1,28 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package teste;
 
 message Movie {
   optional int32 _id = 1;
-  optional string title = 2;
+  string title = 2;
   repeated string cast = 3;
   repeated string genres = 4;
-  optional int32 runtime = 5;
-  optional int32 year = 6;
-  optional string type = 7;
+  int32 runtime = 5;
+  int32 year = 6;
+  string type = 7;
 }
 
 message MoviesList {
   repeated Movie movies = 1;
 }
 
+message Command {
+  string message = 1;
+}
+
+message Response {
+  string message = 1;
+}
 
 
 
