@@ -1,3 +1,13 @@
+/**
+  Make connection with server, receive user inputs by terminal, make API calls (CRUD) based on user inputs, assure user don't send empty fields of movies. 
+
+  Author: Alexandre Aparecido Scrocaro Junior, Pedro Klayn
+  Dates: 
+    start: 02/05/2023
+    more info: https://github.com/alescrocaro/representacao-externa-dados
+ */
+
+
 const net = require('net');
 const prompt = require('prompt-sync')();
 const { Movie, Command } = require('./movie_pb');

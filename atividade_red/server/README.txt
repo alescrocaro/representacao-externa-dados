@@ -1,6 +1,11 @@
+# Install
+Run this command in repo/server:
+pip3 install -r requirements.txt
 
 
-
+# Run
+Run this command in repo/server:
+python3 main.py
 
 
 # Libraries
