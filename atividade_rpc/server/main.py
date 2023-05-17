@@ -25,7 +25,7 @@ class Server:
         """
             Start database connection
         """
-        # print('setou false')
+        print('+++INIT SERVER')
         self.connected = False
         # Create instance of MongoDBClient class
         mongo_client = MongoDBClient()
@@ -316,6 +316,7 @@ def str_to_num(str):
 
 class MovieController(MovieServiceServicer):
     def __init__(self):
+        print('__init__')
         self.db_server = Server()
         
 

@@ -6,7 +6,6 @@ import {
 } from './funcs';
 import './App.css'
 import { useEffect, useState } from 'react';
-import { Movie } from './generated_code/movie_pb';
 
 const App = () => {
   const [movies, setMovies] = useState();
