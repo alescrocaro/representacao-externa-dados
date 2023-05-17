@@ -352,9 +352,13 @@ class MovieController(MovieServiceServicer):
         return database_server_response
 
 def serve():
+    print("Serve")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    print("Serve2")
     add_MovieServiceServicer_to_server(MovieController(), server)
+    print("Serve3")
     server.add_insecure_port('[::]:50051')
+    print("Serve4")
     server.start()
     print("Server up and listening to port 50051")
     server.wait_for_termination()
