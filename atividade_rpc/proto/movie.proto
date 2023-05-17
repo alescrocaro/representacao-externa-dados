@@ -26,10 +26,10 @@ message Response {
 
 
 service MovieService {
-  rpc CreateMovie(Command) returns (Response) {}
+  rpc CreateMovie(Movie) returns (Response) {}
   rpc ListMoviesByCast(Command) returns (stream Movie) {}
   rpc ListMoviesByGenres(Command) returns (stream Movie) {}
-  rpc UpdateMovie(Command) returns (Response) {}
+  rpc UpdateMovie(Movie) returns (Response) {}
   rpc DeleteMovie(Command) returns (Response) {}
 }
 

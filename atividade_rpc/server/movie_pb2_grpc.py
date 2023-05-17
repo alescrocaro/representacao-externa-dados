@@ -16,7 +16,7 @@ class MovieServiceStub(object):
         """
         self.CreateMovie = channel.unary_unary(
                 '/teste.MovieService/CreateMovie',
-                request_serializer=movie__pb2.Command.SerializeToString,
+                request_serializer=movie__pb2.Movie.SerializeToString,
                 response_deserializer=movie__pb2.Response.FromString,
                 )
         self.ListMoviesByCast = channel.unary_stream(
@@ -31,7 +31,7 @@ class MovieServiceStub(object):
                 )
         self.UpdateMovie = channel.unary_unary(
                 '/teste.MovieService/UpdateMovie',
-                request_serializer=movie__pb2.Command.SerializeToString,
+                request_serializer=movie__pb2.Movie.SerializeToString,
                 response_deserializer=movie__pb2.Response.FromString,
                 )
         self.DeleteMovie = channel.unary_unary(
@@ -79,7 +79,7 @@ def add_MovieServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CreateMovie': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateMovie,
-                    request_deserializer=movie__pb2.Command.FromString,
+                    request_deserializer=movie__pb2.Movie.FromString,
                     response_serializer=movie__pb2.Response.SerializeToString,
             ),
             'ListMoviesByCast': grpc.unary_stream_rpc_method_handler(
@@ -94,7 +94,7 @@ def add_MovieServiceServicer_to_server(servicer, server):
             ),
             'UpdateMovie': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateMovie,
-                    request_deserializer=movie__pb2.Command.FromString,
+                    request_deserializer=movie__pb2.Movie.FromString,
                     response_serializer=movie__pb2.Response.SerializeToString,
             ),
             'DeleteMovie': grpc.unary_unary_rpc_method_handler(
@@ -124,7 +124,7 @@ class MovieService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/teste.MovieService/CreateMovie',
-            movie__pb2.Command.SerializeToString,
+            movie__pb2.Movie.SerializeToString,
             movie__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -175,7 +175,7 @@ class MovieService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/teste.MovieService/UpdateMovie',
-            movie__pb2.Command.SerializeToString,
+            movie__pb2.Movie.SerializeToString,
             movie__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

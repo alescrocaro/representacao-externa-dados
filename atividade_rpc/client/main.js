@@ -19,7 +19,7 @@ const client = new net.Socket();
 var global_movie_name = undefined;
 
 let PORT = 52515
-PORT = 47323
+PORT = 50051
 
 /**
  * connect function with API, then calls main function

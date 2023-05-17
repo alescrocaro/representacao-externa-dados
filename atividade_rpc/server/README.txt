@@ -2,6 +2,7 @@
 Run this command in repo/server:
 pip3 install -r requirements.txt
 
+/representacao-externa-dados/atividade_rpc/server$ python3 -m grpc_tools.protoc -I ../proto --python_out=. --grpc_python_out=. ../proto/movie.proto 
 
 # Run
 Run this command in repo/server:
