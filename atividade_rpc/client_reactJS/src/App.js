@@ -24,7 +24,7 @@ const App = () => {
   const [movies, setMovies] = useState([]);
 
   const teste = async () => {
-    await handleListByCast(MovieServiceClient('http://localhost:80'), 'alex')
+    await handleListByCast(MovieServiceClient('http://127.0.0.1:80'), 'alex')
   }
 
   useEffect(() => {

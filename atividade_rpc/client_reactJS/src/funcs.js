@@ -1,7 +1,7 @@
 import { Command } from './generated_code/movie_pb';
 import { MovieServiceClient } from './generated_code/movie_grpc_web_pb';
 
-const client = new MovieServiceClient('http://localhost:80');
+const client = new MovieServiceClient('http://127.0.0.1:8000');
 console.log('client', client)
 
 export const createMovie = (movie) => {
@@ -17,35 +17,25 @@ export const createMovie = (movie) => {
 };
 
 
-  // ~~~~~ ListByActor (stream do servidor) ~~~~
 export async function handleListByCast(stub, nameActor){    
   await new Promise((resolve, reject) => {
-      // console.log('styvb', stub)
-      //chama funcao read do stub, com Msg de parametro
-
       const command = new Command();
-
       command.setMessage(nameActor)
 
       var call = client.listMoviesByCast(command);       
-      console.log('call', call)
-
-      //fica recebendo movie em stream
-      call.on('data', (Movie) => {            
-          console.log('\n==================== Movie ====================\n')
-          console.log(Movie);
+      call.on('data', (movie) => {            
+          console.log(movie);
       });
       
-      //é chamado quando o servidor termina de mandar os movie
       call.on('end', () => {                  
-          console.log('*** end ***')
-          resolve()
+          console.log('end');
+          resolve();
       });
       
       //em caso de erro
       call.on('error', (e) => {
-          console.log('*** error ***', e)
-          reject(e)
+          console.log('error', e);
+          reject();
       });
   })
 };

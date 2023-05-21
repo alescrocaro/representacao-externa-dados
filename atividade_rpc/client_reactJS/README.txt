@@ -1,7 +1,6 @@
 # Install
 Run these commands in `repo/client_react`:
   npm install
-  npm run dev
   
 - If you want to generate code, you can run this command:
 sudo npm install -g protoc-gen-grpc-web
@@ -9,7 +8,14 @@ sudo npm install -g protoc-gen-grpc-web
 
 
 
-rxjs -> arquivo gerado
+# It's not working.
+Couldn't find a way to fix the CORS issue: 
+cess to XMLHttpRequest at 'http://localhost/teste.MovieService/ListMoviesByCast' from origin 'http://localhost:3000' 
+has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' 
+header is present on the requested resource.
+
+
+
 grpc-web -> conexao
 
 

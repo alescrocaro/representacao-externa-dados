@@ -25,7 +25,6 @@ from google.protobuf.json_format import MessageToJson
 from grpc import RpcContext
 from grpc_reflection.v1alpha import reflection
 
-# Resto do seu código do servidor gRPC
 
 class Server:
     def __init__(self):
@@ -90,7 +89,7 @@ class Server:
             filter (string[]): ['cast'|'genres', '<user_input_from_client>']
 
         Returns:
-            MoviesList: All movies found into a dictionary list
+            movies[]: All movies found into a dictionary list
         """
         if self.connected:
             print('reading movie...')
@@ -209,18 +208,32 @@ def movie_obj_to_protobuf(movie):
 
 
 class MovieController(movie_pb2_grpc.MovieServiceServicer):
-    def __init__(self):
+    """class to handle client request
+
+    Args:
+        movie_pb2_grpc (MovieServiceServicer): servicer
+    """
+    def __init__(self): # starts db server
         print('__init__')
         self.db_server = Server()
 
-    def _add_cors_headers(self, context: RpcContext):
-        context.send_initial_metadata((
-            ('Access-Control-Allow-Origin', '*'),  # Configurar o valor desejado para o cabeçalho
-            ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE'),  # Métodos permitidos
-            ('Access-Control-Allow-Headers', 'Content-Type'),
-        ))
+    # def _add_cors_headers(self, context: RpcContext):
+    #     context.send_initial_metadata((
+    #         ('Access-Control-Allow-Origin', '*'),  # Configurar o valor desejado para o cabeçalho
+    #         ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE'),  # Métodos permitidos
+    #         ('Access-Control-Allow-Headers', 'Content-Type'),
+    #     ))
 
     def CreateMovie(self, request, context):
+        """get client request and calls create_movie of database class
+
+        Args:
+            request (Movie): movie sent by client
+            context (_type_): _description_
+
+        Returns:
+            Response: 'success' or 'error'
+        """
         print('create movie')
         json_movie = MessageToJson(request)
         print('teste')
@@ -229,6 +242,15 @@ class MovieController(movie_pb2_grpc.MovieServiceServicer):
         return database_server_response
 
     def ListMoviesByGenres(self, request, context):
+        """get client request and calls read_movie of database class
+
+        Args:
+            request (Command): movie title sent by client
+            context (_type_): _description_
+
+        Returns:
+            Movie[]: every movie found
+        """
         print('read movie by genres')
         movies = self.db_server.read_movie(['genres', request.message])
         print(movies)
@@ -236,6 +258,15 @@ class MovieController(movie_pb2_grpc.MovieServiceServicer):
             yield movie_obj_to_protobuf(movie)
 
     def ListMoviesByCast(self, request, context):
+        """get client request and calls read_movie of database class
+
+        Args:
+            request (Command): movie title sent by client
+            context (_type_): _description_
+
+        Returns:
+            Movie[]: every movie found
+        """
         print('read movie by cast')
         movies = self.db_server.read_movie(['cast', request.message])
         print(movies)
@@ -250,6 +281,15 @@ class MovieController(movie_pb2_grpc.MovieServiceServicer):
         return database_server_response
 
     def DeleteMovie(self, request, context):
+        """get client request and calls delete_movie of database class
+
+        Args:
+            request (Command): movie title sent by client
+            context (_type_): _description_
+
+        Returns:
+            Response: 'success' or 'error'
+        """
         print('update movie')
         database_server_response = self.db_server.delete_movie(request.message)
 
@@ -258,18 +298,13 @@ class MovieController(movie_pb2_grpc.MovieServiceServicer):
 
 
 def serve():
-    print("Serve")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     reflection.enable_server_reflection("MovieService", server)
-    print("Serve2")
     movie_pb2_grpc.add_MovieServiceServicer_to_server(MovieController(), server)
-    print("Serve3")
-    server.add_insecure_port('[::]:50051')
-    print("Serve4")
+    server.add_insecure_port('127.0.0.1:50051')
     server.start()
     print("Server up and listening to port 50051")
     server.wait_for_termination()
-    print('fim serve')
 
 
 
