@@ -7,14 +7,12 @@
     more info: https://github.com/alescrocaro/representacao-externa-dados
  */
 
-
-const net = require('net');
 const prompt = require('prompt-sync')();
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
 const { Movie, Command } = require('./movie_pb');
 
-const accepted_commands = ['create', 'list', 'update', 'delete']
-
-const client = new net.Socket();
+const accepted_commands = ['create', 'listByCast', 'listByGenres', 'update', 'delete']
 
 var global_movie_name = undefined;
 
@@ -24,16 +22,16 @@ PORT = 50051
 /**
  * connect function with API, then calls main function
  */
-client.connect(PORT, '127.0.0.1', () => {
-    console.log('Connection established with server.');
-    console.log("You can use the following commands:");
-    console.log('> create');
-    console.log('> list');
-    console.log('> update');
-    console.log('> delete');
-    console.log('> close');
-    main();
-});
+// client.connect(PORT, '127.0.0.1', () => {
+//     console.log('Connection established with server.');
+//     console.log("You can use the following commands:");
+//     console.log('> create');
+//     console.log('> list');
+//     console.log('> update');
+//     console.log('> delete');
+//     console.log('> close');
+//     main();
+// });
 
 /**
  * Get information to create or update a movie. does not let user leave a field empty.
@@ -118,38 +116,38 @@ const getCreateOrUpdateData = (isUpdating) => {
  * if it's an error or success message, display in console, if it's an close, destroy the client, and 
  * then calls main function
  */
-client.on('data', data => {
-  try {
-    console.log('data received from server: ');
-    console.log('');
-    console.log(data.toString());
+// client.on('data', data => {
+//   try {
+//     console.log('data received from server: ');
+//     console.log('data', data);
+//     console.log('data.toString()', data.toString());
 
-    const stringData = data.toString().trim();
-    if (stringData === 'waitingCreate' || stringData.substring(0, 14).includes('waitingUpdate')) { // idk why but stringData is like ' waitingUpdate'
-      // console.log('entrou if')
-      const isUpdating = stringData.substring(0, 14) === 'waitingUpdate' ? global_movie_name : false;
+//     const stringData = data.toString().trim();
+//     if (stringData === 'waitingCreate' || stringData.substring(0, 14).includes('waitingUpdate')) { // idk why but stringData is like ' waitingUpdate'
+//       // console.log('entrou if')
+//       const isUpdating = stringData.substring(0, 14) === 'waitingUpdate' ? global_movie_name : false;
       
-      const dataToWrite = getCreateOrUpdateData(isUpdating);
+//       const dataToWrite = getCreateOrUpdateData(isUpdating);
 
-      client.write(dataToWrite);
-      return;
-    }
-    else if (stringData === 'error') {
-      console.log('Error');
-    }
-    else if (stringData.includes('success')) {
-      console.log('Success');
-    }
-    else if (stringData.includes('close')) {
-      console.log('Connection closed');
-      client.destroy();
-    }
+//       client.write(dataToWrite);
+//       return;
+//     }
+//     else if (stringData === 'error') {
+//       console.log('Error');
+//     }
+//     else if (stringData.includes('success')) {
+//       console.log('Success');
+//     }
+//     else if (stringData.includes('close')) {
+//       console.log('Connection closed');
+//       client.destroy();
+//     }
 
-    main();
-  } catch (err) {
-    console.log('catch error: ', err);
-  }
-});
+//     main();
+//   } catch (err) {
+//     console.log('catch error: ', err);
+//   }
+// });
 
 /**
  * Get information for the CRUD (like the title of the movie)
@@ -218,71 +216,209 @@ const build_protobuf_movie_object = (title, cast, genres, runtime, year) => {
   return protobuf_movie_obj;
 }
 
+
+
+const handle_create = () => {
+  console.log('creating movie')
+  const movie_obj = {
+    title: undefined,
+    cast: undefined,
+    genres: undefined,
+    runtime: undefined,
+    year: undefined,
+    type: 'movie',
+  }
+
+  while (filled_fields.length < 5) {
+    if (filled_fields.length === 0) {
+      const movie_title = prompt('Movie Title: ' );
+      if (movie_title.trim() === '') {
+        console.log('The movie must have a title');
+        continue;
+      }
+      movie_obj.title = movie_title.trim();
+      filled_fields += 1;
+    }
+    
+    if (filled_fields.length === 1) {
+      const movie_cast = prompt('Movie cast: ' ).trim();
+      if (movie_cast === '') {
+        console.log('The movie must have a cast');
+        continue;
+      }
+      movie_obj.cast.push(movie_cast);
+      filled_fields += 1;
+    }
+
+    if (filled_fields.length === 2) {
+      const movie_genre = prompt('Movie genre: ' ).trim();
+      if (movie_genre === '') {
+        console.log('The movie must have a genre');
+        continue;
+      }
+      movie_obj.genres.push(movie_genre);
+      filled_fields += 1;
+    }
+
+    if (filled_fields.length === 3) {
+      const movie_runtime = prompt('Movie runtime: ' ).trim();
+      if (movie_runtime === '') {
+        console.log('The movie must have a runtime');
+        continue;
+      }
+      movie_obj.runtime = +movie_runtime;
+      filled_fields += 1;
+    }
+
+    if (filled_fields.length === 4) {
+      const movie_year = prompt('Movie year: ' ).trim();
+      if (movie_year === '') {
+        console.log('The movie must have a year');
+        continue;
+      }
+      movie_obj.year = +movie_year;
+      filled_fields += 1;
+    }
+
+    // const new_movie = new Movie
+
+
+
+  }
+}
+
+const handle_listByCast = async (stub, cast) => {
+  // console.log('handle_listByCast - stub: ', stub);
+  console.log('handle_listByCast - cast: ', cast);
+  await new Promise((resolve, reject) => {
+    console.log('promise')
+    //chama funcao read do stub, com Msg de parametro
+    var call = stub.ListMoviesByCast({'message' : cast});
+    // console.log('call', call);
+
+    
+    //fica recebendo movie em stream
+    call.on('data', (Movie) => {            
+        console.log('\n==================== Movie ====================\n')
+        console.log(Movie);
+    });
+    
+    //é chamado quando o servidor termina de mandar os movie
+    call.on('end', () => {                  
+        console.log('*** end ***')
+        resolve()
+    });
+    
+    //em caso de erro
+    call.on('error', (e) => {
+        console.log('error: ', e)
+        reject(e)
+    });
+})
+
+}
+
+
+
 /**
  * Convert user input in a shape the API will understand 
  * @param {string} input: user command for a CRUD or close connection
  * @returns {string} with command length + command
  */
-const build_header = (input) => {
-  let message = '';
+const handle_command = async (stub, input) => {
+  const command = input.split(' ')[0];
 
-  switch (input) {
+  switch (command) {
     case 'create':
-      message += '6';
-      message += 'create';
+      handle_create(stub);
       break;
   
-    case 'list':
-      message += '4';
-      message += 'list';
+    case 'listByCast':
+      console.log('case list by cast')
+      await handle_listByCast(stub, input.split(' ')[1]);
       break;
 
+    case 'listByGenres':
+      break;
+      
     case 'update':
-      message += '6';
-      message += 'update';
       break;
 
     case 'delete':
-      message += '6';
-      message += 'delete';
       break;
 
     case 'close':
-      message += '5';
-      message += 'close';
       break;
               
     default:
-      message = undefined;
       break;
   }
 
-  return message;
+  return 'message';
 }
 
 /**
  * Get user command
  */
-const main = () => {
-  while (true) {
-    const line = prompt('$ ')
-    if (accepted_commands.includes(line.trim())) {
-      console.log('input: ', line.trim());
-      var message = build_header(line.trim());
+// const main = () => {
+//   while (true) {
+//     const line = prompt('$ ')
+//     if (accepted_commands.includes(line.trim())) {
+//       console.log('input: ', line.trim());
+//       var message = build_header(line.trim());
       
-      if (!message) continue
+//       if (!message) continue
 
-      const extra_infos = get_extra_infos(line);
-      if (extra_infos) message += extra_infos;
-      else continue;
+//       const extra_infos = get_extra_infos(line);
+//       if (extra_infos) message += extra_infos;
+//       else continue;
 
-      const command = new Command();
-      command.message = message.trim();
-      client.write(command.message);
-      break;
-    } else if (line.trim() === 'close') {
-      client.destroy();
+//       const command = new Command();
+//       command.message = message.trim();
+//       client.write(command.message);
+//       break;
+//     } else if (line.trim() === 'close') {
+//       client.destroy();
+//       break;
+//     }
+//   }
+// }
+
+const create_stub = () => {
+  const package_definition = protoLoader.loadSync('../proto/movie.proto');
+  const proto_descriptor = grpc.loadPackageDefinition(package_definition).teste
+  const stub = new proto_descriptor.MovieService('localhost:50051', grpc.credentials.createInsecure());
+
+  return stub
+}
+
+
+const main = async () => {
+  const stub = create_stub();
+
+  console.log("You can use the following commands:");
+  console.log('> create');
+  console.log('> listByCast <name>');
+  console.log('> listByGenres <genre>');
+  console.log('> update <movie_name>');
+  console.log('> delete <movie_name>');
+  console.log('> close');
+  
+  // main while
+  while (true) {
+    const input = prompt('$ ').trim(); 
+    console.log('a', input.split(' ')[0])
+    if (accepted_commands.includes(input.split(' ')[0])) {
+      console.log('b')
+      const message = handle_command(stub, input);
+
+
+
+    } else if (input === 'close') {
+      stub.destroy();
       break;
     }
   }
 }
+
+main();

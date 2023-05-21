@@ -14,3 +14,7 @@ python3 main.py
 - movie_pb: code generated through a proto file with an interface for movies
 - pymongo.errors: used to PyMongoError throw database errors
 - socket: is a built-in python library for creating a TCP connection with the client using socket.
+
+
+# tests with grpcurl
+grpcurl -plaintext -d '{"message": "alex"}' localhost:50051 teste.MovieService/ListMoviesByCast

@@ -3,7 +3,7 @@ syntax = "proto3";
 package teste;
 
 message Movie {
-  optional int32 _id = 1;
+  optional string id = 1;
   string title = 2;
   repeated string cast = 3;
   repeated string genres = 4;
@@ -32,21 +32,3 @@ service MovieService {
   rpc UpdateMovie(Movie) returns (Response) {}
   rpc DeleteMovie(Command) returns (Response) {}
 }
-
-
-  // enum PhoneType {
-  //   MOBILE = 0;
-  //   HOME = 1;
-  //   WORK = 2;
-  // }
-
-  // message PhoneNumber {
-  //   optional string number = 1;
-  //   optional PhoneType type = 2 [default = HOME];
-  // }
-
-  // repeated PhoneNumber phones = 4;
-
-// message AddressBook {
-//   repeated Person people = 1;
-// }
