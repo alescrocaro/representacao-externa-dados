@@ -11,3 +11,10 @@ sudo npm install -g protoc-gen-grpc-web
 
 rxjs -> arquivo gerado
 grpc-web -> conexao
+
+
+
+
+
+alescrocaro@alescrocaro-X570DD:~/Documentos/representacao-externa-dados/atividade_rpc/sera$ sudo systemctl start nginx
+alescrocaro@alescrocaro-X570DD:~/Documentos/representacao-externa-dados/atividade_rpc/sera$ sudo systemctl status nginx

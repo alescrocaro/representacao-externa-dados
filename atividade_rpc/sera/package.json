@@ -6,8 +6,8 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "antd": "^5.5.0",
     "google-protobuf": "^3.21.2",
-    "grpc-web": "^1.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "protoc --proto_path=src/proto --js_out=import_style=commonjs:src/generated --grpc-web_out=import_style=commonjs,mode=grpcwebtext:src/generated --plugin=protoc-gen-grpc-web=node_modules/grpc-web/bin/protoc-gen-grpc-web.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -36,5 +36,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "grpc-web": "^1.4.2"
   }
 }

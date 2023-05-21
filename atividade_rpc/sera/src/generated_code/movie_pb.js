@@ -148,7 +148,7 @@ proto.teste.Movie.prototype.toObject = function(opt_includeInstance) {
  */
 proto.teste.Movie.toObject = function(includeInstance, msg) {
   var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
     title: jspb.Message.getFieldWithDefault(msg, 2, ""),
     castList: (f = jspb.Message.getRepeatedField(msg, 3)) == null ? undefined : f,
     genresList: (f = jspb.Message.getRepeatedField(msg, 4)) == null ? undefined : f,
@@ -192,7 +192,7 @@ proto.teste.Movie.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt32());
+      var value = /** @type {string} */ (reader.readString());
       msg.setId(value);
       break;
     case 2:
@@ -248,9 +248,9 @@ proto.teste.Movie.prototype.serializeBinary = function() {
  */
 proto.teste.Movie.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = /** @type {number} */ (jspb.Message.getField(message, 1));
+  f = /** @type {string} */ (jspb.Message.getField(message, 1));
   if (f != null) {
-    writer.writeInt32(
+    writer.writeString(
       1,
       f
     );
@@ -301,16 +301,16 @@ proto.teste.Movie.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional int32 _id = 1;
- * @return {number}
+ * optional string id = 1;
+ * @return {string}
  */
 proto.teste.Movie.prototype.getId = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /**
- * @param {number} value
+ * @param {string} value
  * @return {!proto.teste.Movie} returns this
  */
 proto.teste.Movie.prototype.setId = function(value) {

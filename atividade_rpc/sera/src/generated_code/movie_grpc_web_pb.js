@@ -21,7 +21,6 @@ grpc.web = require('grpc-web');
 
 const proto = {};
 proto.teste = require('./movie_pb.js');
-console.log(proto)
 
 /**
  * @param {string} hostname

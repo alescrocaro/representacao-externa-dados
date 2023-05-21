@@ -1,7 +1,7 @@
 import { Command } from './generated_code/movie_pb';
 import { MovieServiceClient } from './generated_code/movie_grpc_web_pb';
 
-const client = new MovieServiceClient('http://localhost:50051');
+const client = new MovieServiceClient('http://localhost:80');
 console.log('client', client)
 
 export const createMovie = (movie) => {
@@ -16,29 +16,38 @@ export const createMovie = (movie) => {
   });
 };
 
-export const listMoviesByCast = (cast) => {
-  return new Promise((resolve, reject) => {
-    const command = new Command();
-    command.setMessage(cast);
-    console.log('command', command)
-    console.log('client', client)
-    const stream = client.listMoviesByCast(command, {});
-    console.log('stream', stream);
-    const movies = [];
 
-    stream.on('data', (movie) => {
-      movies.push(movie);
-      console.log('teste', movie)
-    });
+  // ~~~~~ ListByActor (stream do servidor) ~~~~
+export async function handleListByCast(stub, nameActor){    
+  await new Promise((resolve, reject) => {
+      // console.log('styvb', stub)
+      //chama funcao read do stub, com Msg de parametro
 
-    stream.on('error', (err) => {
-      reject(err);
-    });
+      const command = new Command();
 
-    stream.on('end', () => {
-      resolve(movies);
-    });
-  });
+      command.setMessage(nameActor)
+
+      var call = client.listMoviesByCast(command);       
+      console.log('call', call)
+
+      //fica recebendo movie em stream
+      call.on('data', (Movie) => {            
+          console.log('\n==================== Movie ====================\n')
+          console.log(Movie);
+      });
+      
+      //é chamado quando o servidor termina de mandar os movie
+      call.on('end', () => {                  
+          console.log('*** end ***')
+          resolve()
+      });
+      
+      //em caso de erro
+      call.on('error', (e) => {
+          console.log('*** error ***', e)
+          reject(e)
+      });
+  })
 };
 
 export const listMoviesByGenres = (genres) => {
